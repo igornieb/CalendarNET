@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using CalendarNET.Data;
 using CalendarNET.Controlers.Requests;
+using Microsoft.AspNetCore.Identity;
+using CalendarNET.Models;
 
 namespace CalendarNET.Controlers
 {
@@ -10,10 +12,12 @@ namespace CalendarNET.Controlers
     public class TasksController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<UserProfile> _userManager;
 
-        public TasksController(ApplicationDbContext context)
+        public TasksController(ApplicationDbContext context, UserManager<UserProfile> usermanager)
         {
             _context = context;
+            _userManager = usermanager;
         }
 
         // GET: api/Tasks

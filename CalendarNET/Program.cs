@@ -6,12 +6,21 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+var dbName = Environment.GetEnvironmentVariable("DB_NAME");
+var dbPassword = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
+
+
+var connectionString = $"Data Source={dbHost};Initial Catalog={dbName};User ID=sa;Password={dbPassword};TrustServerCertificate=True;\r\n\r\n";
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 
 //JWT token
@@ -27,7 +36,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Calendar API", Version = "v1" });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -54,6 +63,7 @@ builder.Services.AddSwaggerGen(option =>
 });
 
 //JWT
+var secretkey = Environment.GetEnvironmentVariable("SECRET_KEY");
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -67,7 +77,7 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = "CalendarNET",
             ValidAudience = "CalendarNET",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("!SomethingSecret!")),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretkey)),
         };
     });
 //
@@ -87,5 +97,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+//migrations
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    dbContext.Database.Migrate();
+}
+
 
 app.Run();

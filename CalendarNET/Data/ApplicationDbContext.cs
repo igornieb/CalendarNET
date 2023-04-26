@@ -11,8 +11,5 @@ namespace CalendarNET.Data
         {
         }
         public DbSet<Models.Task> TaskCollection { get; set; }
-
-
-
     }
 }

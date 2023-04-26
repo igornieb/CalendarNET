@@ -5,10 +5,12 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
+
 namespace CalendarNET.Models
 {
     public class TokenService
     {
+        private string secretkey = Environment.GetEnvironmentVariable("SECRET_KEY");
         private const int ExpirationMinutes = 30;
         public string CreateToken(UserProfile user)
         {
@@ -57,7 +59,7 @@ namespace CalendarNET.Models
         {
             return new SigningCredentials(
                 new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes("!SomethingSecret!")
+                    Encoding.UTF8.GetBytes(secretkey)
                 ),
                 SecurityAlgorithms.HmacSha256
             );

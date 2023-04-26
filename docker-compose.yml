@@ -18,7 +18,8 @@ services:
         context: .
         dockerfile: CalendarNET/Dockerfile
     ports:
-        - 5000:80
+        - 51830:80
+        - 51836:443
     depends_on:
         - mssqldb
     environment:
@@ -26,6 +27,3 @@ services:
         - DB_SA_PASSWORD=cALendardbpa$$word1
         - DB_NAME=calendar
         - SECRET_KEY=!MY_very_secret_key_for_JWT!
-
-
-  

@@ -21,7 +21,7 @@ namespace CalendarNET.Controlers
             _userManager = usermanager;
         }
 
-        // GET: api/Tasks
+        // GET: api/Tasks/today
         // return today tasks
         [HttpGet, Authorize]
         [Route("today")]
@@ -36,6 +36,7 @@ namespace CalendarNET.Controlers
             return today_tasks;
 
         }
+
 
         [HttpGet("{year}/{month}/{day}"), Authorize]
         // GET: api/Task/2022/12/21
@@ -52,22 +53,37 @@ namespace CalendarNET.Controlers
         }
 
         // GET: api/Tasks/{id}
-        [HttpGet("{id}"), Authorize]
+        [HttpGet("{id}")]
         public async Task<ActionResult<Models.Task>> GetTaskId(int id)
         {
           if (_context.TaskCollection == null)
           {
               return NotFound();
           }
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            var task = _context.TaskCollection.FirstOrDefault(task => task.Id==id && task.UserId==user.Id);
-
-            if (task == null)
+            if (User.Identity.IsAuthenticated == true)
             {
-                return NotFound();
-            }
+                var user = await _userManager.FindByNameAsync(User.Identity.Name);
+                var task = _context.TaskCollection.FirstOrDefault(task => task.Id == id);
+                if (task.UserId == user.Id)
+                {
+                    return task;
+                }
+                if (task.shared == true)
+                {
+                    return task;
+                }
+                return Unauthorized();
 
-            return task;
+            }
+            else
+            {
+                var task = _context.TaskCollection.FirstOrDefault(task => task.Id == id && task.shared==true);
+                if (task == null)
+                {
+                    return NotFound();
+                }
+                return task;
+            }
         }
 
         // PUT: api/Tasks/5

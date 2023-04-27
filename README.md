@@ -8,6 +8,8 @@ To run developer server enter project directory in shell and type in `docker-com
 
 ## API endpoints
 
+Access to protected views is managed via JWT Token.
+
 ### /api/User/register
 #### post
 Register new user.

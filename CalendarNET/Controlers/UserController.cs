@@ -103,7 +103,7 @@ namespace CalendarNET.Controlers
 
         //delete account
         [HttpDelete, Authorize]
-        public async Task<ActionResult<UserResponse>> UserDelete()
+        public async Task<ActionResult> UserDelete()
         {
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
             await _userManager.DeleteAsync(user);
